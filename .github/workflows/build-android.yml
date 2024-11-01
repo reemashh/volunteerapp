@@ -39,7 +39,7 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3  # Updated version here
         with:
           name: app-release.apk
           path: android/app/build/outputs/apk/release/app-release.apk
