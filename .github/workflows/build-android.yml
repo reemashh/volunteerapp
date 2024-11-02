@@ -3,8 +3,8 @@ name: Build Android APK
 on:
   push:
     branches:
-      - main  # Triggers the action on push to main branch
-  workflow_dispatch:  # Allows manual triggering
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,30 +26,27 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'  # Updated to Java 17
 
       - name: Install Android SDK
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y openjdk-11-jdk wget unzip
-          # Download cmdline-tools and set up sdkmanager
+          sudo apt-get install -y wget unzip
           mkdir -p "$HOME/android-sdk/cmdline-tools"
           wget -q "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip" -O cmdline-tools.zip
           unzip cmdline-tools.zip -d "$HOME/android-sdk/cmdline-tools"
           mv "$HOME/android-sdk/cmdline-tools/cmdline-tools" "$HOME/android-sdk/cmdline-tools/latest"
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
-          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-          export PATH="$ANDROID_SDK_ROOT/platform-tools:$PATH"
-          # Install required Android SDK components
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-31" "platform-tools" "build-tools;31.0.0"
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "platform-tools" "build-tools;31.0.0"
 
       - name: Build the APK
         working-directory: android
         run: ./gradlew assembleRelease
 
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v3  # Updated version here
+        uses: actions/upload-artifact@v3
         with:
           name: app-release.apk
           path: android/app/build/outputs/apk/release/app-release.apk
